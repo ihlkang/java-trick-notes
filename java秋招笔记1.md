@@ -48,6 +48,4 @@ public boolean equals(Object obj) {
 * 双重检查锁，在单例模式中，
 * 死锁：互斥、请求和保持、不剥夺和循环等待
 
-## MyIsam和Innodb
-* MyIsam不支持事务行级锁和外键约束
 
