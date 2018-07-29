@@ -1,25 +1,52 @@
+### MyIsam和Innodb
+* MyIsam不支持事务行级锁和外键约束，锁的粒度是表级，是非事务安全的，InnoDB支持行级锁，是事务安全的。
+* MyIsam支持全文型索引，InnoDB不支持。
+* MyIsam管理非事务表，提供高速存储和全文搜索能力，若需要执行大量SELECT查询，MyIsam是更好选择。
+* InnoDB用于事务处理应用程序，ACID事务支持。若需要执行大量的INSERT或UPDATE操作，使用InnoDB可以提高多用户并发操作的性能。
+***
+
+### JVM垃圾回收
+![avatar](./images/hotspot.png)
+- 并行和并发
+- Minor GC和Full GC 
+  - Minor称为新生代GC,发生在新生代的垃圾收集，Minor GC较频繁，回收速度也较快
+  - 又称Major GC或老年代GC,发生在老年代的垃圾收集，在老年代空间、方法区空间不足时触发 
+- Serival，针对新生代、采用复制算法和单线程收集，进行垃圾收集时。必须暂停所有工作线程，“Stop The World”
+- Serial Old，针对老年代，采用标记-整理算法(还有MSC)，单线程收集。
+![avatar](./images/serial.png)
+- ParNew是Serial收集器的多线程版本,可用控制参数、收集算法、Stop The World、内存分配规则、回收策略等行为特点与Serial一样。但在单个CPU中，因为存在线程开销问题，效果没Serial好。
+![avatar](./images/parnew.png)
+- Parallel Scavenge又称吞吐量收集器，新生代、复制算法、多线程，目标达到一个可控制的吞吐量：减少垃圾收集时间,让用户代码获得更长的运行时间。
+- Parallel Old是Parallel Scavenge的老年代版本，老年代、标记整理算法、多线程收集
+![avatar](./images/parallel.png)
+- CMS也称为并发低停顿收集器或低延迟垃圾收集器,针对老年代、标记清除、并发收集和低停顿, 与用户交互较多的场景,常见WEB、B/S系统的服务器上的应用。
+![avatar](./images/CMS.png)
+- G1垃圾收集
+![avatar](./images/G1.png)
+***
+
 ### java中基本数据类型是什么？占多少字节
-* JAVA中8种基本数据类型：byte(8位)、short(16)、int(32)、long(64)、float(32)、double(64)、char(16)、boolean;
+- JAVA中8种基本数据类型：byte(8位)、short(16)、int(32)、long(64)、float(32)、double(64)、char(16)、boolean;
 
 ### String类能被继承？为什么
-* String类有final修饰关键字修饰，所以不能被继承;
+- String类有final修饰关键字修饰，所以不能被继承;
 
 ### Java中的String，StringBuilder，StringBuffer三者的区别
-* 运行速度:StringBuilder>StringBuffer>String,前两为字符串变量可以被修改,但String是字符串常量,不能被修改;线程安全上,StringBuilder是线程不安全的,而StringBuffer是线程安全的;StringBuilder相较于StringBuffer有速度优势，所以多数情况下建议使用 StringBuilder类。然而在应用程序要求线程安全的情况下，则必须使用StringBuffer 类
+- 运行速度:StringBuilder>StringBuffer>String,前两为字符串变量可以被修改,但String是字符串常量,不能被修改;线程安全上,StringBuilder是线程不安全的,而StringBuffer是线程安全的;StringBuilder相较于StringBuffer有速度优势，所以多数情况下建议使用 StringBuilder类。然而在应用程序要求线程安全的情况下，则必须使用StringBuffer 类
 
 ### Java中ArrayList和LinkedList区别
-* ArrayList是动态数组, 适用于查找操作，LinkedList是基于链表适用于新增和删除;
+- ArrayList是动态数组, 适用于查找操作，LinkedList是基于链表适用于新增和删除;
 
 ### 代码执行顺序：
-* 父类静态代码块->子类静态代码块->main()方法->父类构造代码块->父类构造方法->子类构造代码块->子类构造方法
-* 普通代码块和一般的语句执行顺由出现的次序决定
-* 构造代码块的执行次序优先于类构造函数
-* 每个静态代码块只会执行一次，静态代码块先于主方法执行
-* 如果类中包含多个静态代码块，那么将按照出现次序执行
+- 父类静态代码块->子类静态代码块->main()方法->父类构造代码块->父类构造方法->子类构造代码块->子类构造方法
+- 普通代码块和一般的语句执行顺由出现的次序决定
+- 构造代码块的执行次序优先于类构造函数
+- 每个静态代码块只会执行一次，静态代码块先于主方法执行
+- 如果类中包含多个静态代码块，那么将按照出现次序执行
 
 ### 用过哪些 Map 类，都有什么区别，HashMap 是线程安全的吗,并发下使用的 Map 是什么，他们内部原理分别是什么，比如存储方式，hashcode，扩容,默认容量
-* HashMap不是线程安全的，HashTable是线程安全的，但同步会带来性能开销，在不需要线程安全下，HashMap性能较好，Hashmap的迭代器初始化时会将modecount赋给迭代器的exceptedmodcount，在迭代过程中，判断modcount和exceptedmodcount是否相等，若不相等，则说明其他线程修改了map，抛出异常，这就是所谓的fail-fast策略
-* LinkedHashMap，父类是HashMap,在HashMap基础上，在内部增加了一个链表，使用双向链表维护键值对次序，插入元素时性能低于HashMap，迭代访问时有很好性能
+- HashMap不是线程安全的，HashTable是线程安全的，但同步会带来性能开销，在不需要线程安全下，HashMap性能较好，Hashmap的迭代器初始化时会将modecount赋给迭代器的exceptedmodcount，在迭代过程中，判断modcount和exceptedmodcount是否相等，若不相等，则说明其他线程修改了map，抛出异常，这就是所谓的fail-fast策略
+- LinkedHashMap，父类是HashMap,在HashMap基础上，在内部增加了一个链表，使用双向链表维护键值对次序，插入元素时性能低于HashMap，迭代访问时有很好性能
 * TreeMap，根据元素的Key进行排序，Map接口派生sortMap子接口，为sortMap的实现类，Treemap的key以TreeSet形式存储
 * HashMap内部Node数组默认大小16，自动扩容机制，重新计算容量，向HashMap对象里不断添加元素，当对象内部的数组无法装载更多元素时,使用新的数组代替已有容量小的数组
 
@@ -78,32 +105,3 @@ public boolean equals(Object obj) {
 ### 反射的原理及创建类的三种方式
 * 是在运行状态中，对于任意一个类，都能都知道这个类的所有属性和方法，对于任意一个对象，都能够调用它的任意一个方法和属性，这种动态获取的信息以及动态调用对象的方法称之为反射
 * model.getClass(),Model.class,Class.forName("Model")
-
-### 反射实例 requestToModel(request,outClass)
-* outClass(PreLoanAssets.class) 获取newInstance(outClass)对象 outModel
-* 通过request对象获取所有字段getAllFieldsOfObject(request) allFields
-    * 获取request对象的类对象,Class<?> requestClass = request.getClass()
-    * 获取所有声明的字段,Field[] requestFields = requestClass .getDeclaredFields()
-    * Map<String,FieldInfo> allFields = new HashMap<>(requestFields.length)
-    * requestFields 中 非静态 非Neglected{字段f.getAnnotation(Neglected.class)}
-    * 取原始字段名 映射字段名 字段值
-        * f.getName() 获取字段名
-        * getFieldName(requestClass, f)，getMappingFieldName(f, originalFieldName)，MapToField mapToField =field.getAnnotation(MapToField.class); 返回mapToField 获取映射字段名
-        * getGetterMethodFromClass(requestClass, fieldName);
-        * String getterName = String.format("get%c%s", Character.toUpperCase(fieldName.charAt(0))
-        * ,fieldName.substring(1));Method method = requestClass.getMethod(getterName)
-        * 获取request类的getXXX方法invokeMethod(method, request);执行该get方法，返回字段值fieldValue
-        * 将获取的映射字段名作为键，FieldInfo(原始字段名、字段类型、字段值)作为值存入allFields中
-* 依此获取FieldInfo字段信息 映射字段名fName、字段类型fClass、字段值fValue 获取set方法 执行set方法
-    * FieldInfo fi = allFields.get(fName); Class<?> fClass = fi.fieldClass;  Object fValue = fi.fieldValue;
-    * Method setter = ReflectUtil.getSetterMethodFromClass(outClass, fName, fClass);获取setter方法
-        * String setterName = String.format("set%s%s",Character.toUpperCase(fieldName.charAt(0)),fieldName.subString(1));
-        * Method method = outClass.getMethod(setterName,fClass);
-        * ReflectUtil.invokeMethod(setter, outModel, fValue);执行setter方法；
-* 返回outModel
-
-### MyIsam和Innodb
-
-### spring实例化两种方式：
-* BeanUtils和cglib
-* spring提供两种方式生成代理对象jdkproxy cglib
