@@ -43,4 +43,22 @@
     * 重写相应的方法能够在bean定义前，在bean定义时，在bean定义后执行
     * 重写相应的方法在bean销毁时执行
 * 循环注入：构造器注入，单例bean的setter注入，多例bean的setter注入
-* aop术语：连接点，切点，增强，目标对象，引介，织入，代理，切面
+* aop实现原理：面向切面编程，将影响多个类的公共行为封装到可重用模块-Aspect切面
+    * 动态代理：利用截取消息的方式，对该消息进行装饰，以取代原有对象行为的执行
+    * 静态织入：引入特定的语法创建Aspect，使编译器可以在编译期间织入有关Aspect的代码
+    * 使用场景：权限认证，缓存，懒加载，日志处理，事务处理
+* aop术语：
+    * 连接点，程序执行的某个特定位置
+    * 切点，通过切点定位连接点，一个切点可以有多个连接点
+    * 增强，织入到目标类连接点上的一段程序
+    * 目标对象，增强逻辑的织入目标类
+    * 引介，动态为业务类添加接口的实现逻辑
+    * 织入，增强添加对目标类具体连接点上的过程
+    * 代理，aop织入增强后，产生一个融合原类和增强逻辑的代理结果类
+    * 切面，由切点和增强组成，包括横切逻辑和连接点
+***
+### Springmvc中DispatcherServlet初始化过程
+* 作为前端控制器，所有的请求都要通过它来进行处理、转发、匹配，并转由页面进行展示
+* 初始化部分由initServletBean()启动，通过initWebApplicationContext()方法调用DispatcherServlet的initStrategies方法，并初始化handlerMapping,ViewResolver
+* 对Http的请求进行响应，作为一个Servlet，web容器会调用Servlet的doGet()和doPost()方法，在经过FrameServlet的processRequest()简单处理后，会调用DispatcherServlet的doService()方法，在这个方法中封装了doDispatch()
+***
