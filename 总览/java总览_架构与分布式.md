@@ -74,6 +74,27 @@
 ***
 ### 什么是paxos算法
 * 是分布式一致性算法用来解决一个分布式系统如何就某个值(决议)达成一致的问题
-* prepare阶段：
-    * 
-* acceptor阶段
+* 基于消息传递的一致性算法，prepare阶段和acceptor阶段
+***
+### 一个在线文档系统，文档可以被编辑，如何防止多人同时对同一份文档进行编辑更新
+* 点击编辑的时候，利用redis进行加锁setNX完了之后expire一下，也可以用版本号进行控制
+***
+### 线上系统突然变得异常缓慢，你如何查找问题
+* 逐级排查（网络，磁盘，内存，cpu），数据库，日志，中间件等也可通过监控工具排查
+***
+### 说说你平时用到的设计模式
+* 单例：保证一个类仅有一个实例,并提供一个访问它的全局控制点
+* 代理：
+* 模板
+* 策略
+* 命令
+***
+### Dubbo的原理，数据怎么流转的
+* client线程生成一个唯一的ID，Dubbo是使用AtomicLong从0开始累计数字的，打包接口名，方法名，参数值列表和处理结果的回调对象callback，封装在一起组成一个对象object
+* 向专门存放调用信息的全局ConcurrentHashMap里面put(ID, object)，将ID和打包的方法调用信息封装成一对象connRequest，使用IoSession.write(connRequest)异步发送出去
+* 当前线程使用callback的get()方法试图获取远程返回的结果，在get()内部使用synchronized获取回调对象callback的锁， 先检测是否已经获取到结果，如果没有调用callback的wait()方法，释放callback上的锁，让当前线程处于等待状态
+* 服务端接收到请求并处理后，将结果发送给客户端，客户端socket连接上专门监听消息的线程收到消息，分析结果取到ID，再从前面的ConcurrentHashMap里面get(ID)，从而找到callback，将方法调用结果设置到callback对象里
+* 监听线程接着使用synchronized获取回调对象callback的锁（因为前面调用过wait()，那个线程已释放callback的锁了），再notifyAll()，唤醒前面处于等待状态的线程继续执行（callback的get()方法继续执行就能拿到调用结果了），至此，整个过程结束
+*** 
+### 一次RPC请求的流程是什么
+* 
